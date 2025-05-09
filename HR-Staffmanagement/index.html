@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management Portal</title>
+    <style>
+        :root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #6366f1;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --background: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --border: #e2e8f0;
+    --gradient-start: #4f46e5;
+    --gradient-end: #6366f1;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    padding: 5px;
+    background: linear-gradient(135deg, #f6f7ff 0%, #ffffff 100%);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    background-color: var(--card);
+    padding: 1rem;
+    border-radius: 0rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+               0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transition: var(--transition);
+    overflow: hidden;
+    position: relative;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    transition: var(--transition);
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0 2rem;
+    position: relative;
+    border-bottom: 2px solid #f1f5f9;
+    background-color: var(--primary-dark);
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    animation: headerLine 2s ease-in-out infinite;
+}
+
+@keyframes headerLine {
+    0% { width: 50px; left: 0; }
+    50% { width: 100px; }
+    100% { width: 50px; left: calc(100% - 50px); }
+}
+
+.header h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff, #fdfdfd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleFade 0.5s ease-out;
+    letter-spacing: -0.025em;
+    position: relative;
+    margin-right: 1rem;
+}
+
+@keyframes titleFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.add-employee-btn {
+    border: none;
+    border-radius: 0.5rem;
+    min-width: 150px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: var(--primary);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+}
+
+.add-employee-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    overflow-y: auto;
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--card);
+    margin: 5% auto;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 1rem;
+    position: relative;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.close {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: var(--transition);
+    height: 28px;
+    width: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+}
+
+.close:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.employee-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: 500;
+    color: var(--text);
+}
+
+input, select {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.error {
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+input.invalid, select.invalid {
+    border-color: var(--danger);
+}
+
+.training-group {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.training-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.submit-btn {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+}
+
+.submit-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
+}
+
+.employee-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 0.3rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+.employee-table th {
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    text-align: center;
+    padding: 0.6rem;
+}
+
+.employee-table td {
+    border: 1px solid var(--border);
+    padding: 0.8rem;
+    text-align: left;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.employee-table th:nth-child(1),
+.employee-table td:nth-child(1) {
+    max-width: 150px;
+}
+
+.employee-table th:nth-child(2),
+.employee-table td:nth-child(2) {
+    max-width: 100px;
+}
+
+.employee-table th:nth-child(3),
+.employee-table td:nth-child(3) {
+    max-width: 200px;
+}
+
+.employee-table th:nth-child(4),
+.employee-table td:nth-child(4) {
+    max-width: 120px;
+}
+
+.employee-table th:nth-child(5),
+.employee-table td:nth-child(5) {
+    max-width: 120px;
+}
+
+.employee-table th:nth-child(6),
+.employee-table td:nth-child(6) {
+    max-width: 100px;
+}
+
+.employee-table th:nth-child(7),
+.employee-table td:nth-child(7) {
+    max-width: 150px;
+}
+
+.employee-table th:nth-child(8),
+.employee-table td:nth-child(8) {
+    max-width: 180px;
+}
+
+.employee-table td:hover {
+    overflow-x: auto;
+    white-space: normal;
+}
+
+.employee-table tr {
+    transition: var(--transition);
+}
+
+.employee-table tbody tr:hover {
+    background-color: var(--background);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    min-width: 180px;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+}
+
+.edit-btn, .delete-btn {
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: var(--transition);
+    min-width: 70px;
+    text-align: center;
+}
+
+.edit-btn {
+    background-color: var(--primary);
+}
+
+.delete-btn {
+    background-color: var(--danger);
+}
+
+.edit-btn:hover, .delete-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(110%);
+}
+
+.success-message {
+    display: none;
+    background-color: rgb(220 252 231);
+    color: var(--success);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.success-message.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.search-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background-color: var(--background);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.date-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.date-label {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.reset-search {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.reset-search:hover {
+    background-color: #4b5563;
+    transform: translateY(-1px);
+}
+
+.no-records {
+    display: none;
+    padding: 3rem;
+    text-align: center;
+    background-color: var(--background);
+    border-radius: 0.75rem;
+    margin: 2rem 0;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.no-records.show {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.no-records-icon {
+    font-size: 3rem;
+    color: #94a3b8;
+    /* margin-bottom: 1rem; */
+}
+
+.no-records-text {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #64748b;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.responsive-table-container {
+    overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border-radius: 0.5rem;
+}
+
+.employee-card {
+    display: none;
+    padding: 1.25rem;
+    background-color: var(--card);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.card-field {
+    display: flex;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+_CARD_FIELD:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.card-label {
+    font-weight: 600;
+    min-width: 140px;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.card-value {
+    flex: 1;
+    word-wrap: break-word;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+@media (max-width: 1024px) {
+    body {
+        padding: 1.5rem;
+    }
+    
+    .container {
+        padding: 1.5rem;
+    }
+    
+    .header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .header h1 {
+        font-size: 1.75rem;
+        flex-basis: 100%;
+        margin-bottom: 1rem;
+        text-align: center;
+        margin-right: 0;
+    }
+    
+    .add-employee-btn {
+        margin-left: auto;
+        margin-right: auto;
+        min-width: 200px;
+    }
+    
+    .search-container {
+        flex-direction: column;
+        padding: 1.25rem;
+    }
+    
+    .date-filter {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .reset-search {
+        width: 100%;
+    }
+    
+    .employee-table th,
+    .employee-table td {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
+    .container {
+        padding: 1.25rem;
+        border-radius: 1rem;
+    }
+    
+    .header {
+        padding: 0.75rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .add-employee-btn {
+        width: 100%;
+        padding: 0.875rem;
+    }
+    
+    .employee-table {
+        display: none;
+    }
+    
+    .employee-card {
+        display: block;
+    }
+    
+    .modal-content {
+        margin: 5% auto;
+        width: 95%;
+        padding: 1.25rem;
+    }
+    
+    .training-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .training-group label {
+        width: 100%;
+    }
+    
+    .search-container {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .date-filter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .date-filter .search-input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.75rem;
+    }
+    
+    .container {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+    
+    .header {
+        padding: 0.5rem 0 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .add-employee-btn {
+        font-size: 0.95rem;
+        padding: 0.75rem;
+    }
+    
+    .modal-content {
+        padding: 1.25rem 1rem;
+    }
+    
+    .close {
+        right: 1rem;
+        top: 1rem;
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 0.75rem;
+    }
+    
+    .employee-form {
+        gap: 1rem;
+    }
+    
+    .no-records {
+        padding: 2rem 1rem;
+    }
+    
+    .no-records-text {
+        font-size: 1.1rem;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>STAFF MANAGEMENT PORTAL</h1>   
+    </div>
+    <div class="container">
+        <div class="success-message" id="successMessage">
+            Employee operation completed successfully!
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by ID or Email...">
+            <div class="date-filter">
+                <span class="date-label">Joining Date:</span>
+                <input type="date" id="dateFilter" class="search-input">
+            </div>
+            <button id="resetSearch" class="reset-search">Reset</button>
+            <button class="add-employee-btn" onclick="openModal()">Add Employee</button>
+        </div>
+
+        <div id="noRecords" class="no-records">
+            <div class="no-records-icon">📂</div>
+            <div class="no-records-text">No records found</div>
+            <p>Try adjusting your search criteria</p>
+        </div>
+
+        <div class="responsive-table-container">
+            <table class="employee-table" id="employeeTable">
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Employee ID</th>
+                        <th>Company Mail</th>
+                        <th>Role</th>
+                        <th>Joining Date</th>
+                        <th>Training Status</th>
+                        <th>Project Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="employeeCards"></div>
+
+        <div id="employeeModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">×</span>
+                <h2 id="modalTitle">Add Employee</h2>
+                <form id="employeeForm" class="employee-form" novalidate>
+                    <div class="form-group">
+                        <label for="name">Employee Name</label>
+                        <input type="text" id="name" required maxlength="50">
+                        <span class="error" id="nameError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empId">Employee ID</label>
+                        <input type="text" id="empId" required maxlength="7">
+                        <span class="error" id="empIdError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Company Mail</label>
+                        <input type="email" id="email" required maxlength="64">
+                        <span class="error" id="emailError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <input type="text" id="role" required maxlength="50">
+                        <span class="error" id="roleError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="joiningDate">Joining Date</label>
+                        <input type="date" id="joiningDate" required>
+                        <span class="error" id="joiningDateError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Training Status</label>
+                        <div class="training-group">
+                            <label>
+                                <input type="radio" name="training" value="ongoing" required> Ongoing
+                            </label>
+                            <label>
+                                <input type="radio" name="training" value="done"> Done
+                            </label>
+                        </div>
+                        <span class="error" id="trainingError"></span>
+                    </div>
+
+                    <div class="form-group project-group" id="projectGroup" style="display: none;">
+                        <label for="projectStatus">Project Status</label>
+                        <select id="projectStatus" required>
+                            <option value="on-bench">On Bench</option>
+                            <option value="in-project">In Project</option>
+                        </select>
+
+                        <div class="form-group" id="projectNameGroup" style="display: none;">
+                            <label for="projectName">Project Name</label>
+                            <input type="text" id="projectName" maxlength="50">
+                            <span class="error" id="projectNameError"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('employeeModal');
+        const form = document.getElementById('employeeForm');
+        const successMessage = document.getElementById('successMessage');
+        const projectGroup = document.getElementById('projectGroup');
+        const projectStatus = document.getElementById('projectStatus');
+        const projectNameGroup = document.getElementById('projectNameGroup');
+        const employeeTableBody = document.getElementById('employeeTableBody');
+        const employeeTable = document.getElementById('employeeTable');
+        const noRecords = document.getElementById('noRecords');
+        const searchInput = document.getElementById('searchInput');
+        const dateFilter = document.getElementById('dateFilter');
+        const resetSearch = document.getElementById('resetSearch');
+        const submitBtn = document.getElementById('submitBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        let editingId = null;
+        let filteredEmployees = [];
+
+        // Validation functions
+        function countAlphaChars(str) {
+            return str.replace(/[^A-Za-z]/g, '').length;
+        }
+
+        function validateName(name) {
+            if (!name) return false;
+            const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
+            const alphaCount = countAlphaChars(name);
+            return name.length <= 50 && alphaCount >= 5 && nameRegex.test(name);
+        }
+
+        function validateEmployeeId(empId) {
+            const empIdRegex = /^ATS0(?!000)\d{3}$/;
+            return empIdRegex.test(empId);
+        }
+
+        function validateEmail(email) {
+            const emailRegex = /^[a-zA-Z0-9._%+-]{1,64}@astrolitetech\.com$/;
+            return emailRegex.test(email);
+        }
+
+        function validateRole(role) {
+            if (!role) return false;
+            const roleRegex = /^[A-Za-z][A-Za-z\s]*$/;
+            const alphaCount = countAlphaChars(role);
+            return role.length <= 50 && alphaCount >= 5 && roleRegex.test(role);
+        }
+
+        function validateJoiningDate(dateString) {
+            if (!dateString) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(dateString);
+            const minDate = new Date('1950-01-01');
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            return dateRegex.test(dateString) && 
+                   selectedDate <= today && 
+                   selectedDate >= minDate;
+        }
+
+        function validateTrainingStatus() {
+            return document.querySelector('input[name="training"]:checked') !== null;
+        }
+
+        function validateProjectName(projectName) {
+            if (!projectName) return false;
+            const projectNameRegex = /^[A-Za-z][A-Za-z\s]*$/;
+            const alphaCount = countAlphaChars(projectName);
+            return projectName.length <= 50 && alphaCount >= 5 && projectNameRegex.test(projectName);
+        }
+
+        // Modal functions
+        function openModal() {
+            modal.style.display = 'block';
+            modal.offsetHeight;
+            modal.classList.add('show');
+            submitBtn.disabled = false;
+            modalTitle.textContent = editingId ? 'Edit Employee' : 'Add Employee';
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                form.reset();
+                projectGroup.style.display = 'none';
+                projectNameGroup.style.display = 'none';
+                editingId = null;
+                modalTitle.textContent = 'Add Employee';
+                const errorSpans = document.querySelectorAll('.error');
+                errorSpans.forEach((span) => (span.textContent = ''));
+                const invalidInputs = document.querySelectorAll('.invalid');
+                invalidInputs.forEach((input) => input.classList.remove('invalid'));
+            }, 300);
+            updateTable();
+        }
+
+        // Input restriction functions
+        function restrictToLettersAndSpaces(inputElement) {
+            inputElement.addEventListener('input', function(e) {
+                const currentValue = this.value;
+                this.value = currentValue.replace(/[^A-Za-z\s]/g, '');
+                if (this.value.length > 50) {
+                    this.value = this.value.slice(0, 50);
+                }
+                if (this.value.startsWith(' ')) {
+                    this.value = this.value.trimStart();
+                }
+                this.value = this.value.replace(/\s{2,}/g, ' ');
+            });
+        }
+
+        function restrictToEmployeeIdFormat(inputElement) {
+            inputElement.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.charCode);
+                const currentValue = this.value;
+                if (currentValue.length < 3) {
+                    const validChar = 'ATS'.charAt(currentValue.length);
+                    if (char.toUpperCase() !== validChar) {
+                        e.preventDefault();
+                    }
+                } else if (currentValue.length === 3) {
+                    if (char !== '0') {
+                        e.preventDefault();
+                    }
+                } else if (currentValue.length >= 4 && currentValue.length < 7) {
+                    if (!/^\d$/.test(char)) {
+                        e.preventDefault();
+                    }
+                } else {
+                    e.preventDefault();
+                }
+            });
+            
+            inputElement.addEventListener('input', function() {
+                const currentValue = this.value;
+                if (currentValue.length <= 3) {
+                    this.value = currentValue.toUpperCase();
+                }
+            });
+        }
+
+        function restrictToEmailFormat(inputElement) {
+            inputElement.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.charCode);
+                if (!/^[a-zA-Z0-9._%+\-@]$/.test(char))      {
+                    e.preventDefault();
+                }
+                if (this.value.length >= 64 && char !== '@') {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        const nameInput = document.getElementById('name');
+        restrictToLettersAndSpaces(nameInput);
+
+        const empIdInput = document.getElementById('empId');
+        restrictToEmployeeIdFormat(empIdInput);
+
+        const emailInput = document.getElementById('email');
+        restrictToEmailFormat(emailInput);
+
+        const roleInput = document.getElementById('role');
+        restrictToLettersAndSpaces(roleInput);
+
+        const projectNameInput = document.getElementById('projectName');
+        restrictToLettersAndSpaces(projectNameInput);
+
+        // Input validation events
+        nameInput.addEventListener('input', function () {
+            const isValid = validateName(this.value);
+            this.classList.toggle('invalid', !isValid);
+            document.getElementById('nameError').textContent = isValid
+                ? ''
+                : 'Name: Max 50 chars, min 5 letters';
+        });
+
+        empIdInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\s/g, '');
+            const isValid = validateEmployeeId(this.value);
+            this.classList.toggle('invalid', !isValid);
+            document.getElementById('empIdError').textContent = isValid
+                ? ''
+                : 'Format: ATS0XXX (X is digit)';
+        });
+
+        emailInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\s/g, '');
+            const isValid = validateEmail(this.value);
+            this.classList.toggle('invalid', !isValid);
+            document.getElementById('emailError').textContent = isValid
+                ? ''
+                : 'Max 64 chars before @astrolitetech.com';
+        });
+
+        roleInput.addEventListener('input', function () {
+            const isValid = validateRole(this.value);
+            this.classList.toggle('invalid', !isValid);
+            document.getElementById('roleError').textContent = isValid
+                ? ''
+                : 'Role: Max 50 chars, min 5 letters';
+        });
+
+        document.getElementById('joiningDate').addEventListener('input', function () {
+            const isValid = validateJoiningDate(this.value);
+            this.classList.toggle('invalid', !isValid);
+            document.getElementById('joiningDateError').textContent = isValid
+                ? ''
+                : 'Date must be between 1950 and today';
+        });
+
+        document.querySelectorAll('input[name="training"]').forEach((radio) => {
+            radio.addEventListener('change', function () {
+                const errorSpan = document.getElementById('trainingError');
+                if (errorSpan) errorSpan.textContent = '';
+                projectGroup.style.display = this.value === 'done' ? 'block' : 'none';
+                if (this.value === 'ongoing') {
+                    projectNameGroup.style.display = 'none';
+                    projectStatus.value = 'on-bench';
+                }
+            });
+        });
+
+        projectNameInput.addEventListener('input', function () {
+            const projectStatusValue = projectStatus.value;
+            if (projectStatusValue === 'in-project') {
+                const isValid = validateProjectName(this.value);
+                this.classList.toggle('invalid', !isValid);
+                document.getElementById('projectNameError').textContent = isValid
+                    ? ''
+                    : 'Project: Max 50 chars, min 5 letters';
+            } else {
+                this.classList.remove('invalid');
+                document.getElementById('projectNameError').textContent = '';
+            }
+        });
+
+        projectStatus.addEventListener('change', function () {
+            projectNameGroup.style.display = this.value === 'in-project' ? 'block' : 'none';
+            if (this.value === 'on-bench') {
+                projectNameInput.value = '';
+                projectNameInput.classList.remove('invalid');
+                document.getElementById('projectNameError').textContent = '';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const employee = {
+                name: nameInput.value,
+                emp_id: empIdInput.value,
+                email: emailInput.value,
+                role: roleInput.value,
+                joining_date: document.getElementById('joiningDate').value,
+                training: document.querySelector('input[name="training"]:checked')?.value,
+                project_status: projectStatus.value,
+                project_name: projectStatus.value === 'in-project' ? projectNameInput.value : ''
+            };
+
+            let isValid = true;
+
+            if (!validateName(employee.name)) {
+                nameInput.classList.add('invalid');
+                document.getElementById('nameError').textContent = 'Name: Max 50 chars, min 5 letters';
+                isValid = false;
+            } else {
+                nameInput.classList.remove('invalid');
+                document.getElementById('nameError').textContent = '';
+            }
+
+            if (!validateEmployeeId(employee.emp_id)) {
+                empIdInput.classList.add('invalid');
+                document.getElementById('empIdError').textContent = 'Format: ATS0XXX (X is digit)';
+                isValid = false;
+            } else {
+                empIdInput.classList.remove('invalid');
+                document.getElementById('empIdError').textContent = '';
+            }
+
+            if (!validateEmail(employee.email)) {
+                emailInput.classList.add('invalid');
+                document.getElementById('emailError').textContent = 'Max 64 chars before @astrolitetech.com';
+                isValid = false;
+            } else {
+                emailInput.classList.remove('invalid');
+                document.getElementById('emailError').textContent = '';
+            }
+
+            if (!validateRole(employee.role)) {
+                roleInput.classList.add('invalid');
+                document.getElementById('roleError').textContent = 'Role: Max 50 chars, min 5 letters';
+                isValid = false;
+            } else {
+                roleInput.classList.remove('invalid');
+                document.getElementById('roleError').textContent = '';
+            }
+
+            if (!validateJoiningDate(employee.joining_date)) {
+                document.getElementById('joiningDate').classList.add('invalid');
+                document.getElementById('joiningDateError').textContent = 'Date must be between 1950 and today';
+                isValid = false;
+            } else {
+                document.getElementById('joiningDate').classList.remove('invalid');
+                document.getElementById('joiningDateError').textContent = '';
+            }
+
+            if (!employee.training) {
+                document.getElementById('trainingError').textContent = 'Please select a training status';
+                isValid = false;
+            } else {
+                document.getElementById('trainingError').textContent = '';
+            }
+
+            if (employee.training === 'done' && employee.project_status === 'in-project' && !validateProjectName(employee.project_name)) {
+                projectNameInput.classList.add('invalid');
+                document.getElementById('projectNameError').textContent = 'Project: Max 50 chars, min 5 letters';
+                isValid = false;
+            } else if (employee.training === 'done' && employee.project_status === 'in-project' && validateProjectName(employee.project_name)) {
+                projectNameInput.classList.remove('invalid');
+                document.getElementById('projectNameError').textContent = '';
+            }
+
+            if (!isValid) return;
+
+            submitBtn.disabled = true;
+
+            try {
+                let response;
+                if (!editingId) {
+                    response = await fetch('http://localhost:3000/api/employees', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(employee)
+                    });
+                } else {
+                    response = await fetch(`http://localhost:3000/api/employees/${editingId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(employee)
+                    });
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.errors.join(', '));
+                }
+
+                updateTable();
+                closeModal();
+
+                successMessage.style.display = 'block';
+                successMessage.offsetHeight;
+                successMessage.classList.add('show');
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 300);
+                }, 2700);
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Error: ' + error.message);
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Search functionality
+        function searchEmployees() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const dateValue = dateFilter.value;
+            
+            filteredEmployees = filteredEmployees.filter(employee => {
+                const matchesSearchTerm = searchTerm === '' || 
+                    employee.name.toLowerCase().includes(searchTerm) || 
+                    employee.emp_id.toLowerCase().includes(searchTerm) || 
+                    employee.email.toLowerCase().includes(searchTerm);
+                const matchesDate = dateValue === '' || employee.joining_date === dateValue;
+                return matchesSearchTerm && matchesDate;
+            });
+            
+            updateTableWithFiltered();
+        }
+
+        function updateTableWithFiltered() {
+            employeeTableBody.innerHTML = '';
+            
+            if (filteredEmployees.length === 0) {
+                employeeTable.style.display = 'none';
+                noRecords.classList.add('show');
+            } else {
+                employeeTable.style.display = 'table';
+                noRecords.classList.remove('show');
+                
+                filteredEmployees.forEach((employee) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${employee.name}</td>
+                        <td>${employee.emp_id}</td>
+                        <td>${employee.email}</td>
+                        <td>${employee.role}</td>
+                        <td>${formatDate(employee.joining_date)}</td>
+                        <td>${capitalizeFirstLetter(employee.training)}</td>
+                        <td>
+                            ${capitalizeFirstLetter(employee.project_status.replace('-', ' '))}
+                            ${employee.project_status === 'in-project' && employee.project_name ? `<br><small>${employee.project_name}</small>` : ''}
+                        </td>
+                        <td class="action-buttons">
+                            <button class="edit-btn" onclick="editEmployee(${employee.id})">Edit</button>
+                            <button class="delete-btn" onclick="deleteEmployee(${employee.id})">Delete</button>
+                        </td>
+                    `;
+                    employeeTableBody.appendChild(row);
+                });
+                
+                updateCardView();
+            }
+        }
+
+        function updateCardView() {
+            const employeeCards = document.getElementById('employeeCards');
+            employeeCards.innerHTML = '';
+            
+            filteredEmployees.forEach((employee) => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                
+                card.innerHTML = `
+                    <div class="card-field">
+                        <div class="card-label">Name:</div>
+                        <div class="card-value">${employee.name}</div>
+                    </div>
+                    <div class="card-field">
+                        <div class="card-label">Employee ID:</div>
+                        <div class="card-value">${employee.emp_id}</div>
+                    </div>
+                    <div class="card-field">
+                        <div class="card-label">Email:</div>
+                        <div class="card-value">${employee.email}</div>
+                    </div>
+                    <div class="card-field">
+                        <div class="card-label">Role:</div>
+                        <div class="card-value">${employee.role}</div>
+                    </div>
+                    <div class="card-field">
+                        <div class="card-label">Joining Date:</div>
+                        <div class="card-value">${formatDate(employee.joining_date)}</div>
+                    </div>
+                    <div class="card-field">
+                        <div class="card-label">Training Status:</div>
+                        <div class="card-value">${capitalizeFirstLetter(employee.training)}</div>
+                    </div>
+                    <div class="card-field">
+                        <div class="card-label">Project Status:</div>
+                        <div class="card-value">
+                            ${capitalizeFirstLetter(employee.project_status.replace('-', ' '))}
+                            ${employee.project_status === 'in-project' && employee.project_name ? `<br><small>${employee.project_name}</small>` : ''}
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="edit-btn" onclick="editEmployee(${employee.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteEmployee(${employee.id})">Delete</button>
+                    </div>
+                `;
+                employeeCards.appendChild(card);
+            });
+        }
+
+        resetSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            dateFilter.value = '';
+            updateTable();
+        });
+
+        searchInput.addEventListener('input', searchEmployees);
+        dateFilter.addEventListener('change', searchEmployees);
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        async function updateTable() {
+            try {
+                const response = await fetch('http://localhost:3000/api/employees');
+                if (!response.ok) throw new Error('Failed to fetch employees');
+                filteredEmployees = await response.json();
+                updateTableWithFiltered();
+            } catch (error) {
+                console.error('Error fetching employees:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function editEmployee(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/employees/${id}`);
+                if (!response.ok) throw new Error('Employee not found');
+                const employee = await response.json();
+                
+                editingId = employee.id;
+                nameInput.value = employee.name;
+                empIdInput.value = employee.emp_id;
+                emailInput.value = employee.email;
+                roleInput.value = employee.role;
+                document.getElementById('joiningDate').value = employee.joining_date;
+                
+                document.querySelector(`input[name="training"][value="${employee.training}"]`).checked = true;
+                
+                if (employee.training === 'done') {
+                    projectGroup.style.display = 'block';
+                    projectStatus.value = employee.project_status;
+                    if (employee.project_status === 'in-project') {
+                        projectNameGroup.style.display = 'block';
+                        projectNameInput.value = employee.project_name || '';
+                    } else {
+                        projectNameGroup.style.display = 'none';
+                    }
+                } else {
+                    projectGroup.style.display = 'none';
+                    projectNameGroup.style.display = 'none';
+                }
+                
+                openModal();
+            } catch (error) {
+                console.error('Error editing employee:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function deleteEmployee(id) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/employees/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) throw new Error('Failed to delete employee');
+                    updateTable();
+                    successMessage.style.display = 'block';
+                    successMessage.offsetHeight;
+                    successMessage.classList.add('show');
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 300);
+                    }, 2700);
+                } catch (error) {
+                    console.error('Error deleting employee:', error);
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const joiningDateInput = document.getElementById('joiningDate');
+            joiningDateInput.setAttribute('min', '1950-01-01');
+            joiningDateInput.setAttribute('max', new Date().toISOString().split('T')[0]);
+            
+            updateTable();
+        });
+    </script>
+</body>
+</html>
