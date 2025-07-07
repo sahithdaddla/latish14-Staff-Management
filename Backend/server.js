@@ -243,7 +243,7 @@ app.delete('/api/employees/:id', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server running at http://13.60.88.230:${port}`);
+    console.log(`Server running at http://13.60.252.56:${port}`);
 });
 
 // Initialize database table
